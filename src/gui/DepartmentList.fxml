@@ -20,9 +20,9 @@
          </padding>
       </Label>
       <ToolBar prefHeight="40.0" prefWidth="200.0">
-        <items>
-          <Button fx:id="btNew" mnemonicParsing="false" onAction="#onBtNewAction" text="New" />
-        </items>
+         <items>
+            <Button fx:id="btNew" mnemonicParsing="false" onAction="#onBtNewAction" text="New" />
+         </items>
       </ToolBar>
       <TableView fx:id="tableViewDepartment" prefHeight="342.0" prefWidth="600.0">
         <columns>
