@@ -1,19 +1,24 @@
-
 package gui;
 
+import gui.util.Alerts;
 import gui.util.Constraints;
+import gui.util.Utils;
 import java.net.URL;
 import java.util.ResourceBundle;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import model.entites.Department;
+import model.services.DepartmentService;
 
-public class DepartmentFormController implements Initializable{
+public class DepartmentFormController implements Initializable {
 
-    @FXML
+    private DepartmentService service;
+
     private Department entity;
     @FXML
     private TextField txtId;
@@ -25,38 +30,66 @@ public class DepartmentFormController implements Initializable{
     private Button btSave;
     @FXML
     private Button btCancel;
-    
-    @FXML
-    public void setDepartment(Department department){
-        this.entity = department;
+
+    public void setDepartment(Department entity) {
+        this.entity = entity;
     }
-    
-    @FXML
-    public void onBtSaveAction(){
-        System.out.println("onBtSaveAction");
+
+    public void setDepartmentService(DepartmentService service) {
+        this.service = service;
     }
-    
+
     @FXML
-    public void onBtCancelAction(){
-        System.out.println("onBtCancelAction");
+    public void onBtSaveAction(ActionEvent event) {
+
+        if (entity == null) {
+            throw new IllegalStateException("Entite was null");
+        }
+        if (service == null) {
+            throw new IllegalStateException("Service was null");
+
+        }
+        try{
+        entity = getFormData();
+
+        service.saveOrUpdate(entity);
+        Utils.currentStage(event).close();
+        } 
+        catch(db.DbException e){
+            Alerts.showAlert("Error saving object", null, e.getMessage(), Alert.AlertType.ERROR);
+        }
     }
-    
+
+    private Department getFormData() {
+        Department obj = new Department();
+
+        obj.setId(Utils.tryParseToInt(txtId.getText()));
+        obj.setName(txtName.getText());
+
+        return obj;
+    }
+
+    @FXML
+    public void onBtCancelAction(ActionEvent event) {
+        Utils.currentStage(event).close();
+    }
+
     @Override
-    public void initialize(URL location, ResourceBundle resources) {
+    public void initialize(URL uri, ResourceBundle rb) {
+        initializeNodes();
     }
-    
-    private void initializeNodes(){
+
+    private void initializeNodes() {
         Constraints.setTextFieldInteger(txtId);
         Constraints.setTextFieldMaxLength(txtName, 30);
     }
-    
-    public void updateFormData(){
-        if (entity == null){
+
+    public void updateFormData() {
+        if (entity == null) {
             throw new IllegalStateException("Entity was null");
         }
         txtId.setText(String.valueOf(entity.getId()));
-        txtName.setText(String.valueOf(entity.getName()));
-        
+        txtName.setText(entity.getName());
     }
-    
+
 }
