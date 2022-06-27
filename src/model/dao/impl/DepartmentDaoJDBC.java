@@ -17,13 +17,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-/**
- *
- * @author b246131
- */
+
 public class DepartmentDaoJDBC implements DepartmentDao {
 
     public Connection conn;
