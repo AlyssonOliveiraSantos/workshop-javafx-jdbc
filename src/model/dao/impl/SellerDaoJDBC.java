@@ -14,13 +14,8 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-/**
- *
- * @author b246131
- */
+
 public class SellerDaoJDBC implements SellerDao {
 
     private Connection conn;
@@ -194,7 +189,7 @@ public class SellerDaoJDBC implements SellerDao {
         obj.setName(rs.getString("Name"));
         obj.setEmail(rs.getString("Email"));
         obj.setBaseSalary(rs.getDouble("BaseSalary"));
-        obj.setBirthDate(rs.getDate("BirthDate"));
+        obj.setBirthDate(new java.util.Date(rs.getTimestamp("BirthDate").getTime()));
         obj.setDepartment(dept);
         return obj;
     }

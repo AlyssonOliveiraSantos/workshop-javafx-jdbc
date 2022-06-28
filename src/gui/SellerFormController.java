@@ -5,8 +5,11 @@ import gui.util.Alerts;
 import gui.util.Constraints;
 import gui.util.Utils;
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -15,6 +18,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import model.entites.Seller;
@@ -26,15 +30,27 @@ public class SellerFormController implements Initializable {
     private SellerService service;
 
     private Seller entity;
-    
+
     private List<DataChangeListener> dataChangeListener = new ArrayList<>();
-    
+
     @FXML
     private TextField txtId;
     @FXML
     private TextField txtName;
     @FXML
+    private TextField txtEmail;
+    @FXML
+    private DatePicker dpBirthDate;
+    @FXML
+    private TextField txtBaseSalary;
+    @FXML
     private Label labelErrorName;
+    @FXML
+    private Label labelErrorEmail;
+    @FXML
+    private Label labelErrorBirthDate;
+    @FXML
+    private Label labelErrorBaseSalary;
     @FXML
     private Button btSave;
     @FXML
@@ -47,8 +63,8 @@ public class SellerFormController implements Initializable {
     public void setSellerService(SellerService service) {
         this.service = service;
     }
-    
-    public void subscribeDataChangeListener(DataChangeListener listener){
+
+    public void subscribeDataChangeListener(DataChangeListener listener) {
         dataChangeListener.add(listener);
     }
 
@@ -62,34 +78,32 @@ public class SellerFormController implements Initializable {
             throw new IllegalStateException("Service was null");
 
         }
-        try{
-        entity = getFormData();
-        service.saveOrUpdate(entity);
-        notifyDataChangeListener();
-        Utils.currentStage(event).close();
-        } 
-        catch(ValidationException e){
+        try {
+            entity = getFormData();
+            service.saveOrUpdate(entity);
+            notifyDataChangeListener();
+            Utils.currentStage(event).close();
+        } catch (ValidationException e) {
             setErrorMessages(e.getErrors());
-        }
-        catch(db.DbException e){
+        } catch (db.DbException e) {
             Alerts.showAlert("Error saving object", null, e.getMessage(), Alert.AlertType.ERROR);
         }
     }
 
     private Seller getFormData() {
         Seller obj = new Seller();
-        
+
         ValidationException exception = new ValidationException("Validation error");
 
         obj.setId(Utils.tryParseToInt(txtId.getText()));
-        
-        if(txtName.getText() == null || txtName.getText().trim().equals("")){
+
+        if (txtName.getText() == null || txtName.getText().trim().equals("")) {
             exception.addError("name", "Field can't be empty");
         }
-        
+
         obj.setName(txtName.getText());
-        
-        if(exception.getErrors().size()> 0){
+
+        if (exception.getErrors().size() > 0) {
             throw exception;
         }
 
@@ -109,6 +123,9 @@ public class SellerFormController implements Initializable {
     private void initializeNodes() {
         Constraints.setTextFieldInteger(txtId);
         Constraints.setTextFieldMaxLength(txtName, 30);
+        Constraints.setTextFieldDouble(txtBaseSalary);
+        Constraints.setTextFieldMaxLength(txtEmail, 70);
+        Utils.formatDatePicker(dpBirthDate, "dd/MM/yyyy");
     }
 
     public void updateFormData() {
@@ -117,23 +134,29 @@ public class SellerFormController implements Initializable {
         }
         txtId.setText(String.valueOf(entity.getId()));
         txtName.setText(entity.getName());
+        txtEmail.setText(entity.getEmail());
+        Locale.setDefault(Locale.US);
+        txtBaseSalary.setText(String.format("%.2f", entity.getBaseSalary()));
+        if (entity.getBirthDate() != null) {
+            dpBirthDate.setValue(LocalDateTime.ofInstant(entity.getBirthDate().toInstant(), ZoneId.systemDefault()).toLocalDate());
+        }
     }
 
     private void notifyDataChangeListener() {
-        
-        for(DataChangeListener listner: dataChangeListener){
+
+        for (DataChangeListener listner : dataChangeListener) {
             listner.onDataChanged();
         }
-        
+
     }
-    
-    private void setErrorMessages(Map<String, String> errors){
+
+    private void setErrorMessages(Map<String, String> errors) {
         Set<String> fields = errors.keySet();
-        
-        if (fields.contains("name")){
+
+        if (fields.contains("name")) {
             labelErrorName.setText(errors.get("name"));
         }
-        
+
     }
 
 }
